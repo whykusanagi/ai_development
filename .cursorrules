@@ -41,6 +41,8 @@ This file provides comprehensive guidelines for AI assistants (Claude, Cursor) t
 
 10. **Pre-commit**: Always run `make precommit` or let pre-commit hooks run automatically before committing.
 
+11. **MCP Services & Cloud Tools**: Always check for and use available MCP services and CLI tools when deploying, updating, or checking service status. Don't assume services are unavailable - verify what tools are accessible first.
+
 ## File Templates
 
 When creating files, use these templates:
@@ -268,6 +270,82 @@ repos:
 - ✅ Follow Conventional Commits
 - ✅ Check for code duplication before adding new code
 - ✅ Use environment variables for configuration
+- ✅ **Check available MCP services and cloud CLI tools before deploying or updating services**
+- ✅ **Verify service status using available tools (DigitalOcean, AWS, Azure) when troubleshooting or deploying**
+
+## MCP Services & Cloud Provider Tools
+
+**CRITICAL**: Always check for and use available MCP services and CLI tools. Don't assume they're unavailable.
+
+### When to Use MCP Services & Cloud Tools
+
+Use these tools in the following scenarios:
+
+1. **Before Deploying to Production**:
+   - Check service status using available MCP services (DigitalOcean Apps, AWS, Azure)
+   - Verify deployment status and health
+   - Check logs if available via MCP
+   - List running services/applications
+
+2. **When Updating Web Applications**:
+   - Check current deployment status before making changes
+   - Verify service health after updates
+   - Monitor deployment progress
+   - Check application logs for errors
+
+3. **When Troubleshooting**:
+   - Check service status and health
+   - Review logs via MCP services
+   - Verify resource availability
+   - Check deployment history
+
+4. **When Managing Infrastructure**:
+   - List available resources (apps, databases, etc.)
+   - Check resource status and configuration
+   - Verify connectivity and access
+
+### Available MCP Services to Check
+
+Before assuming a service is unavailable, check for:
+
+- **DigitalOcean**: 
+  - `mcp_digitalocean_apps-*` functions (list apps, get info, check deployment status, get logs)
+  - Use when deploying to DigitalOcean App Platform
+  - Always check deployment status after updates
+  
+- **AWS**: 
+  - AWS CLI tools via terminal (`aws` command)
+  - Check service status: `aws ec2 describe-instances`, `aws ecs describe-services`, etc.
+  - Verify deployments and service health
+  
+- **Azure**: 
+  - Azure CLI tools via terminal (`az` command)
+  - Check service status: `az webapp list`, `az vm list`, etc.
+  - Verify resource groups and deployments
+
+- **Cloudflare**:
+  - `mcp_cloudflare-*` functions (Workers, KV, R2, D1, etc.)
+  - Use when managing Cloudflare resources
+
+### Best Practices
+
+1. **Always Check First**: Before deploying or updating, use `list_mcp_resources()` or check available CLI tools
+2. **Verify Status**: After any deployment or update, check service status using MCP services or CLI
+3. **Check Logs**: Use MCP log functions or CLI tools to verify deployments succeeded
+4. **Don't Assume**: Never assume a service is unavailable - always check what tools are accessible
+5. **Use Appropriate Tools**: Use MCP services when available (faster, more reliable), fall back to CLI when needed
+
+### Example Workflow
+
+```python
+# Before deploying:
+1. Check available MCP services: list_mcp_resources()
+2. List current apps/services: mcp_digitalocean_apps-list() or aws/az commands
+3. Check deployment status: mcp_digitalocean_apps-get-deployment-status()
+4. Deploy/update
+5. Verify deployment: Check status again
+6. Check logs: mcp_digitalocean_apps-get-logs() or CLI equivalent
+```
 
 ## AI Assistant Guidelines
 
@@ -281,3 +359,8 @@ When helping with this project:
 7. Use Mermaid diagrams in documentation when describing architecture
 8. Generate files using the templates provided above
 9. Only create files when they're actually needed for the project
+10. **ALWAYS check for available MCP services before deploying or updating services**
+11. **ALWAYS verify service status using MCP tools or CLI when deploying to production**
+12. **ALWAYS check deployment status and logs after making changes to web applications**
+13. **Never assume MCP services or CLI tools are unavailable - check first using list_mcp_resources() or testing CLI availability**
+14. **When deploying or updating, use this workflow: Check status → Deploy → Verify status → Check logs**

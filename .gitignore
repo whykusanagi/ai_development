@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Node
+node_modules/
+
+# Secrets & local configs
+.env
+.env.*
+config/config.yaml
+.secrets/
+
+# Build artifacts
+build/
+dist/
+coverage/
+
+# Agent scratch docs
+tests/_md_scratch/
+
+# Generated files (created by bootstrap.py)
+.editorconfig
+.gitattributes
+.jscpd.json
+.prettierrc
+.eslintrc.cjs
+commitlint.config.cjs
+pyproject.toml
+package.json
+tsconfig.json
+Makefile
+docker-compose.yml
+.pre-commit-config.yaml
+.secrets.baseline

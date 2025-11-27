@@ -4,6 +4,12 @@
   <img src="https://img.shields.io/badge/MCP-Workflow%20Verified-059669?style=flat-square" alt="MCP Workflow Verified" />
 </div>
 
+<div align="center" style="margin: 2rem 0;">
+
+![Enterprise AI guardrails template](https://s3.whykusanagi.xyz/optimized_assets/cute_headshot_transparent_ghub.png)
+
+</div>
+
 > ⚖️ **Compliance:** This README follows the guardrails codified in [`CLAUDE.md`](CLAUDE.md) and [`.cursorrules`](.cursorrules). Update the trio together.
 
 ## Bootstrap the Guardrails Template

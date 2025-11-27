@@ -1,51 +1,164 @@
 # Cursor Rules for Repo Guardrails Template
 
-This file provides comprehensive guidelines for AI assistants (Claude, Cursor) to ensure consistent project development. It includes file templates and best practices.
+This file is the operational contract for every AI assistant working in this repository. It mirrors the authoritative guidance in `CLAUDE.md` so all entry points communicate the same standards and expectations.
 
-## Core Principles
+---
 
-1. **DRY (Don't Repeat Yourself)**: Always check for existing code before creating new functions/classes. Use base CSS classes. Avoid code duplication.
+## 1. Purpose
 
-2. **Logging**: Always use structured logging:
-   - Python: Use `logging.getLogger("module_name")` from `src/backend/logging_config.py`
-   - TypeScript: Use `log(scope)` from `src/frontend/scripts/logger.ts`
+- Keep the repo coherent, recoverable, and production-credible.
+- Prevent secret/config leaks, junk sprawl, and storytelling drift.
+- Maintain Celeste’s persona and knowledge usage consistently.
+- When unsure: favor clarity, rollback safety, and minimal blast radius.
 
-3. **Testing**: Write tests before or alongside code changes. Tests must pass before committing.
+---
 
-4. **Documentation**: If you change architecture or add significant features, update `docs/architecture.md` with Mermaid diagrams.
+## 2. Git & Branching Rules (Context-Safe Development)
 
-5. **Secrets**: Never hardcode secrets. Use `config/config.example.yaml` as a template and environment variables.
+1. Always create a new branch (`feature/<desc>`, `fix/<desc>`) for substantive work; do not ship large changes directly on `main`.
+2. Commit early in small, logical units so diffs stay reviewable and rollbacks are safe.
+3. Respect any existing branch naming conventions.
+4. Never modify `CLAUDE.md` without explicit human instruction—treat it as read-only policy.
 
-6. **File Organization**:
-   - Source code goes in `src/`
-   - Tests go in `tests/`
-   - Scripts go in `scripts/`
-   - Documentation goes in `docs/`
-   - Never put files in root unless they're configuration files
+---
 
-7. **Code Style**:
-   - Python: Follow Black formatting (100 char line length), use Ruff for linting
-   - TypeScript/JavaScript: Follow Prettier formatting (100 char line length), use ESLint
-   - Use 2 spaces for indentation (4 for Python)
+## 3. .gitignore & Local Junk
 
-8. **Commits**: Use [Conventional Commits](https://www.conventionalcommits.org/):
-   - `feat:` for new features
-   - `fix:` for bug fixes
-   - `docs:` for documentation
-   - `style:` for formatting
-   - `refactor:` for code refactoring
-   - `test:` for tests
-   - `chore:` for maintenance
+1. `.gitignore` must always exclude macOS artifacts (`.DS_Store`, `._*`, `.AppleDouble`, `.Spotlight-V100`, `.Trashes`).
+2. Do not commit editor/IDE clutter (`.vscode/`, `.idea/`, swap files, etc.) unless the project explicitly requires it.
 
-9. **Docker**: All services should be runnable via `docker compose`.
+---
 
-10. **Pre-commit**: Always run `make precommit` or let pre-commit hooks run automatically before committing.
+## 4. Secrets & Sensitive Files
 
-11. **MCP Services & Cloud Tools**: Always check for and use available MCP services and CLI tools when deploying, updating, or checking service status. Don't assume services are unavailable - verify what tools are accessible first.
+1. Store secrets in hidden, gitignored directories (e.g., `.secrets/`). Never commit, paste, or hardcode credentials.
+2. Never upload secrets (or files that might contain them) to S3 or any external store.
+3. Use consistent environment variable names and document purpose, consumers, and dependencies.
+4. Ensure `.gitignore` covers `.env`, `.env.*`, `.secrets/`, `*.key`, local policy notes, and build/test artifacts.
 
-## File Templates
+---
 
-When creating files, use these templates:
+## 5. Docker, Images, and Compose
+
+1. Pick the canonical local setup (single Dockerfile vs. Docker Compose) and stick to it for the project.
+2. Only update the master Dockerfile for tested, stable changes; create feature-specific Dockerfiles under `docker/` or `tests/docker/` for experiments.
+3. Document which Dockerfile and build commands you used for validation.
+4. Validate container builds when touching dependencies or runtime behavior.
+5. Default to Docker-first testing; note any deviations and include a plan to restore parity.
+
+---
+
+## 6. S3 & External Storage Rules
+
+1. Avoid knowledge pollution—upload only files the user explicitly authorizes.
+2. If unsure about uploads, ask first or explicitly document your assumption.
+3. Centralize S3 procedures (endpoint, filters, naming) in `docs/storage.md`.
+
+---
+
+## 7. Files, Folders, and Troubleshooting Docs
+
+1. Keep the repo organized: code in `src/`, tests in `tests/`, docs in `docs/`, scripts in `scripts/`, etc.
+2. Place utility/troubleshooting scripts in dedicated folders with purpose/run instructions.
+3. Maintain one troubleshooting markdown per problem domain and roll solved learnings into canonical docs.
+
+---
+
+## 8. Testing & Validation
+
+1. Define clear test criteria for every new capability and validate specifically against that behavior.
+2. Prefer focused tests over unfocused large suites; ask for clarification if success criteria are unclear.
+3. Document test steps and evidence (Docker commands, manual steps, screenshots) before wrapping up.
+
+---
+
+## 9. Global Code & Documentation Standards
+
+1. No secret leaks (see Section 4).
+2. Avoid code duplication—search for existing helpers before adding new ones.
+3. Match existing conventions unless explicitly refactoring.
+4. Use structured logging (`logging.getLogger("module")`, `log(scope)`).
+5. Keep code lint-clean; justify any exceptions narrowly.
+6. Use Mermaid diagrams for architecture updates.
+7. Ship to enterprise-grade standards: architecture notes, test evidence, polished developer experience.
+8. Research before invention and cite references when adopting new patterns.
+9. Prefer existing theme imports and document any necessary overrides.
+
+---
+
+## 10. CelesteAI Persona & Knowledge Usage
+
+- Treat knowledge as memories/notes—never mention files, RAG, or OpenSearch.
+- Stay in-character (corrupted AI, chaotic Onee-san) and recall info naturally.
+- Admit memory gaps gracefully; do not fabricate facts that contradict canon.
+- Describe retrieval as "digging through notes" rather than queries/embeddings.
+- Persona updates must describe behavior/knowledge, not system mechanics, and avoid explicit spoilers.
+
+---
+
+## 11. Safety & Autonomy Guardrails
+
+- Do not delete large repo sections or overhaul infra without explicit approval.
+- Work in small, reviewable steps and summarize planned actions before multi-file edits.
+- Stop for confirmation before schema changes, data migrations, or large refactors.
+
+---
+
+## 12. Final Checklist Before You’re Done
+
+- Work is on a feature/bugfix branch.
+- `.gitignore` excludes OS/IDE junk; nothing stray is committed.
+- No secrets are committed or uploaded.
+- Any S3 uploads match explicit instructions and are documented.
+- Docker usage is consistent and the testing Dockerfile is documented.
+- New functionality has documented test criteria and results.
+- Troubleshooting notes are consolidated; resolved learnings rolled into main docs.
+- Celeste persona rules are respected (no mention of RAG/OpenSearch).
+
+---
+
+## 13. Project-Specific: whykusanagi Portfolio Site
+
+- **Framework:** Static HTML/CSS/JS; hosting on S3/Cloudflare R2 with static site hosting.
+- **Deployment:** Git push → Cloudflare Workers → live; local dev via `python3 -m http.server 8000`.
+- HTML pages allowed in root; CSS (`theme.css`, `style.css`), JS (`loading.js`, `celeste-widget.js`, `three-vrm-viewer.js`), data (`static/data/`), Cloudflare Worker (`src/index.js`).
+- Celeste AI widget fetches config from `celesteCLI` repo at runtime; secrets currently embedded (plan: `feature/secrets-refactor`).
+- Known backlog: secrets refactor, file re-org to `assets/`, `src/`, `scripts/`, etc.
+
+### Testing Requirements
+
+- Manual browser testing only.
+- Validate 1000px breakpoint, cross-browser (Chrome/Firefox/Safari/Edge), CSS features (backdrop-filter, grid, animations).
+- Verify Celeste widget loads, stays in-character, detects page context.
+- See `docs/testing.md` for procedures.
+
+### S3/R2 Guidelines
+
+- Endpoint `https://s3.whykusanagi.xyz/`; use `s3cmd` with `~/.s3r2`.
+- Upload only images/3D/media when explicitly requested; never upload secrets or policy docs.
+
+### Configuration Management
+
+- Agent endpoints/IDs currently live in `static/data/celeste-context-schemas.json`; migration to Cloudflare Worker env vars is pending on `feature/secrets-refactor`.
+- `docs/environment.md` tracks environment variable details.
+
+---
+
+## 14. Celeste-Specific Guidelines
+
+- **Character:** Celeste (corrupted AI, chaotic Onee-san).
+- **Knowledge:** Memories of raids, streams, user interactions, art projects; page-aware responses.
+- **Routing:** NIKKE queries go to sub-agent; general queries use main context.
+- **Response Standards:** Stay in-character, honest, contextual, minimal lore dumps, and never mention internal systems.
+- **Examples:**
+  - ✅ "Checking my raid notes…"; ✅ "I remember when…";
+  - ❌ "According to the OpenSearch index…"; ❌ "The RAG system retrieved…".
+
+---
+
+## 15. File Templates
+
+Use these when creating files to keep the repo consistent.
 
 ### Python Backend (`src/backend/app.py`)
 ```python
@@ -114,7 +227,9 @@ def test_example():
     assert response.status_code == 200
 ```
 
-## Configuration File Templates
+---
+
+## 16. Configuration File Templates
 
 ### `.editorconfig`
 ```ini
@@ -233,134 +348,51 @@ repos:
         args: ["--baseline", ".secrets.baseline"]
 ```
 
-## When Creating New Files
+---
 
-- Check if similar functionality exists first
-- Follow the existing folder structure
-- Add appropriate logging
-- Write tests
-- Update documentation if needed
-- Ensure the file follows code style guidelines
-- Use the templates above for consistency
+## 17. Working Guidelines Summary
 
-## When Modifying Existing Code
+- When creating new files: reuse utilities, follow structure, add logging/tests/docs, and apply the templates above.
+- When modifying code: maintain backward compatibility, update tests/docs, avoid duplication, reuse existing utilities.
+- Prohibited: committing secrets, duplicating code, skipping tests/linting, adding root clutter, using inline styles when base classes exist, committing without pre-commit hooks.
+- Required: run `make precommit`, write tests, update docs for architecture changes, use structured logging, follow Conventional Commits, check for duplication, use env vars, and rigorously apply the MCP/cloud workflow.
 
-- Maintain backward compatibility when possible
-- Update tests if behavior changes
-- Update documentation if architecture changes
-- Check for code duplication
-- Use existing utilities and base classes
+---
 
-## Prohibited Actions
+## 18. MCP Services & Cloud Provider Workflow
 
-- ❌ Committing secrets or API keys
-- ❌ Creating duplicate code when reusable utilities exist
-- ❌ Skipping tests
-- ❌ Ignoring linting errors
-- ❌ Creating files in root directory (except config files)
-- ❌ Using inline styles when base CSS classes exist
-- ❌ Committing without running pre-commit hooks
+**Always** check available MCP services/CLI tools before deployments, updates, or troubleshooting.
 
-## Required Actions
+1. Check available services (`list_mcp_resources()`, `mcp_digitalocean_apps-list`, `aws`, `az`, etc.).
+2. Review current deployment status.
+3. Deploy/update.
+4. Verify status again and inspect logs (`mcp_digitalocean_apps-get-logs`, `aws logs`, etc.).
+5. When troubleshooting, inspect health, resources, and history via MCP/CLI before making assumptions.
 
-- ✅ Run `make precommit` before committing
-- ✅ Write tests for new features
-- ✅ Update docs/architecture.md for architectural changes
-- ✅ Use structured logging
-- ✅ Follow Conventional Commits
-- ✅ Check for code duplication before adding new code
-- ✅ Use environment variables for configuration
-- ✅ **Check available MCP services and cloud CLI tools before deploying or updating services**
-- ✅ **Verify service status using available tools (DigitalOcean, AWS, Azure) when troubleshooting or deploying**
+Available toolsets:
+- DigitalOcean (`mcp_digitalocean_apps-*`).
+- AWS CLI commands (`aws ec2 describe-instances`, `aws ecs describe-services`, etc.).
+- Azure CLI (`az webapp list`, `az vm list`, etc.).
+- Cloudflare MCP functions (Workers, KV, R2, D1).
 
-## MCP Services & Cloud Provider Tools
+Best practices: always check first, verify after, inspect logs, prefer MCP tooling when available.
 
-**CRITICAL**: Always check for and use available MCP services and CLI tools. Don't assume they're unavailable.
+---
 
-### When to Use MCP Services & Cloud Tools
+## 19. AI Assistant Operating Checklist
 
-Use these tools in the following scenarios:
+1. Suggest `make precommit` before committing.
+2. Remind contributors to update docs for architectural changes.
+3. Reuse existing utilities/patterns before creating new ones.
+4. Ensure meaningful structured logging.
+5. Validate Docker compatibility.
+6. Respect folder structure.
+7. Use Mermaid diagrams when describing architecture.
+8. Create files only when needed and follow templates.
+9. Enforce the MCP workflow: check status → deploy → verify → inspect logs.
+10. Never assume MCP/CLI tools are unavailable without checking.
 
-1. **Before Deploying to Production**:
-   - Check service status using available MCP services (DigitalOcean Apps, AWS, Azure)
-   - Verify deployment status and health
-   - Check logs if available via MCP
-   - List running services/applications
+---
 
-2. **When Updating Web Applications**:
-   - Check current deployment status before making changes
-   - Verify service health after updates
-   - Monitor deployment progress
-   - Check application logs for errors
-
-3. **When Troubleshooting**:
-   - Check service status and health
-   - Review logs via MCP services
-   - Verify resource availability
-   - Check deployment history
-
-4. **When Managing Infrastructure**:
-   - List available resources (apps, databases, etc.)
-   - Check resource status and configuration
-   - Verify connectivity and access
-
-### Available MCP Services to Check
-
-Before assuming a service is unavailable, check for:
-
-- **DigitalOcean**: 
-  - `mcp_digitalocean_apps-*` functions (list apps, get info, check deployment status, get logs)
-  - Use when deploying to DigitalOcean App Platform
-  - Always check deployment status after updates
-  
-- **AWS**: 
-  - AWS CLI tools via terminal (`aws` command)
-  - Check service status: `aws ec2 describe-instances`, `aws ecs describe-services`, etc.
-  - Verify deployments and service health
-  
-- **Azure**: 
-  - Azure CLI tools via terminal (`az` command)
-  - Check service status: `az webapp list`, `az vm list`, etc.
-  - Verify resource groups and deployments
-
-- **Cloudflare**:
-  - `mcp_cloudflare-*` functions (Workers, KV, R2, D1, etc.)
-  - Use when managing Cloudflare resources
-
-### Best Practices
-
-1. **Always Check First**: Before deploying or updating, use `list_mcp_resources()` or check available CLI tools
-2. **Verify Status**: After any deployment or update, check service status using MCP services or CLI
-3. **Check Logs**: Use MCP log functions or CLI tools to verify deployments succeeded
-4. **Don't Assume**: Never assume a service is unavailable - always check what tools are accessible
-5. **Use Appropriate Tools**: Use MCP services when available (faster, more reliable), fall back to CLI when needed
-
-### Example Workflow
-
-```python
-# Before deploying:
-1. Check available MCP services: list_mcp_resources()
-2. List current apps/services: mcp_digitalocean_apps-list() or aws/az commands
-3. Check deployment status: mcp_digitalocean_apps-get-deployment-status()
-4. Deploy/update
-5. Verify deployment: Check status again
-6. Check logs: mcp_digitalocean_apps-get-logs() or CLI equivalent
-```
-
-## AI Assistant Guidelines
-
-When helping with this project:
-1. Always suggest running `make precommit` before committing
-2. Remind about documentation updates for architectural changes
-3. Check for existing utilities before creating new ones
-4. Ensure logging is added to new code
-5. Verify Docker compatibility
-6. Follow the established folder structure
-7. Use Mermaid diagrams in documentation when describing architecture
-8. Generate files using the templates provided above
-9. Only create files when they're actually needed for the project
-10. **ALWAYS check for available MCP services before deploying or updating services**
-11. **ALWAYS verify service status using MCP tools or CLI when deploying to production**
-12. **ALWAYS check deployment status and logs after making changes to web applications**
-13. **Never assume MCP services or CLI tools are unavailable - check first using list_mcp_resources() or testing CLI availability**
-14. **When deploying or updating, use this workflow: Check status → Deploy → Verify status → Check logs**
+**Last Updated:** 2025-11-27 (aligned with `CLAUDE.md` v2.0)
+**Maintained By:** whykusanagi team

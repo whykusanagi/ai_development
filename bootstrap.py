@@ -148,6 +148,16 @@ build-backend = "setuptools.build_meta"
         "include": ["src/frontend/**/*"],
         "exclude": ["node_modules", "dist"]
     }, indent=2),
+    "requirements.txt": """# Python dependencies for repo guardrails template
+fastapi==0.115.0
+uvicorn[standard]==0.30.5
+pytest==8.3.3
+ruff==0.6.9
+black==24.8.0
+mypy==1.11.2
+pre-commit==3.8.0
+detect-secrets==1.5.0
+""",
     ".pre-commit-config.yaml": """repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.6.0
@@ -396,10 +406,11 @@ def main():
 
     print("\n✨ Bootstrap complete!")
     print("\n📋 Next steps:")
-    print("  1. Run: make setup")
-    print("  2. Run: npm install (if using frontend)")
-    print("  3. Run: make gen-config")
-    print("  4. Start developing!")
+    print("  1. Run: pip install -r requirements.txt")
+    print("  2. Run: make setup")
+    print("  3. Run: npm install (if using frontend)")
+    print("  4. Run: make gen-config")
+    print("  5. Start developing!")
 
 
 if __name__ == "__main__":

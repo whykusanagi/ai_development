@@ -5,7 +5,9 @@
 </div>
 
 <div align="center" style="margin: 2rem 0;">
-  <img src="https://s3.whykusanagi.xyz/art/cute_headshot_transparent.png" alt="Enterprise AI guardrails template - professional tech aesthetic" width="400" />
+
+![Enterprise AI guardrails template](https://s3.whykusanagi.xyz/art/cute_headshot_transparent.png)
+
 </div>
 
 > ⚖️ **Compliance:** This README follows the guardrails codified in [`CLAUDE.md`](CLAUDE.md) and [`.cursorrules`](.cursorrules). Update the trio together.

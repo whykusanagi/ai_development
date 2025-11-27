@@ -5,7 +5,7 @@
 </div>
 
 <div align="center" style="margin: 2rem 0;">
-
+<!-- Optimized image for GitHub README (under 2MB) -->
 ![Enterprise AI guardrails template](https://s3.whykusanagi.xyz/optimized_assets/cute_headshot_transparent_ghub.png)
 
 </div>

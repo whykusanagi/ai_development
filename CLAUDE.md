@@ -483,12 +483,12 @@ If you cannot satisfy one of these, explain why in your summary, commit message,
 
 ## 20. Public README Branding Playbook
 
-- Lead with a branded header: centered shields.io badges (Live on Discord, Enterprise Ready, command count) paired with a compliance callout referencing this `CLAUDE.md`.
-- Follow immediately with the invite CTA and onboarding checklist so admins know prerequisites, scopes, and validation steps.
-- Present value props as a styled “Celeste Experience Pillars” callout to keep the README feeling like a product brief.
-- Keep the command catalog consumer-facing: organize by persona (conversation, discovery, raid, moderation) with plain-language descriptions and inline parameter hints.
-- Hide deep operational details (audit logging, automations) inside collapsible `<details>` blocks to reduce clutter while preserving transparency.
-- Close with a troubleshooting table, contact paths, licensing note, and a final install CTA to reinforce trust and support.
+- **Header badges:** Open with centered shields.io badges that reflect *this repository’s* qualities (e.g., Policy Locked, Enterprise Ready, MCP Verified) plus a compliance callout referencing `CLAUDE.md` / `.cursorrules`. Avoid copy-pasting branding from other products.
+- **CTA + onboarding checklist:** Immediately follow with a “Get Started” CTA (clone/bootstrap) and a numbered checklist describing prerequisites, tooling, and validation steps required to use this template safely.
+- **Value pillars:** Introduce a styled “Guardrail Experience Pillars” (or equivalent) callout explaining the primary benefits of the repo (branch discipline, secret hygiene, MCP workflow, etc.).
+- **Feature catalog:** Instead of persona-based commands, summarize the repo’s components (docs, scripts, configs, automation) in consumer-friendly language with inline usage hints.
+- **Collapsible operations:** Place deeper operational guidance (audit logging, bootstrap commands, directory maps) inside `<details>` sections to keep the README skimmable while preserving transparency.
+- **Trust-building close:** Finish with a troubleshooting table, support/contact paths, licensing reminder, and a final CTA encouraging teams to apply the template in their environment.
 
 ---
 

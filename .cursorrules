@@ -396,12 +396,12 @@ Best practices: always check first, verify after, inspect logs, prefer MCP tooli
 
 ## 20. Public README Branding Playbook
 
-- Lead with a branded header: centered shields.io badges (Live on Discord, Enterprise Ready, command count) plus a compliance callout referencing `CLAUDE.md`.
-- Follow immediately with the invite CTA and onboarding checklist so admins know prerequisites, scopes, and validation steps.
-- Present value props as a styled “Celeste Experience Pillars” callout to give the README a product brief tone.
-- Keep the command catalog consumer-facing: organize entries by persona (conversation, discovery, raid, moderation) with plain-language descriptions and inline parameter hints.
-- Hide deep operational details (audit logging, automations) inside collapsible `<details>` blocks to reduce clutter while keeping transparency.
-- Close with a troubleshooting table, contact paths, licensing note, and a final install CTA to reinforce support and trustworthiness.
+- **Header badges:** Start with centered shields.io badges tailored to *this repository* (e.g., Policy Locked, Enterprise Ready, MCP Verified) plus a compliance callout that references `CLAUDE.md` / `.cursorrules`. Do not reuse product-specific copy from other projects.
+- **Immediate CTA + checklist:** Provide a “Get Started” (clone/bootstrap) CTA followed by an onboarding checklist describing prerequisites, required tools, and validation steps for this template.
+- **Value pillars:** Present the core benefits of this repo as a styled “Guardrail Experience Pillars” (or similarly named) callout that explains why the template exists.
+- **Feature catalog:** Replace persona-based command lists with a consumer-facing summary of template components (e.g., docs, configs, scripts). Keep descriptions plain-language with inline hints on when to use each artifact.
+- **Collapse deep ops:** Move operational depth (automation hooks, bootstrap steps, directory maps) into `<details>` blocks so the README stays scannable while retaining transparency.
+- **Close strong:** End with a troubleshooting table, contact/support paths, licensing note, and a final CTA reinforcing how to apply the template in a new project.
 
 ---
 

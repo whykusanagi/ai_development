@@ -394,5 +394,16 @@ Best practices: always check first, verify after, inspect logs, prefer MCP tooli
 
 ---
 
+## 20. Public README Branding Playbook
+
+- Lead with a branded header: centered shields.io badges (Live on Discord, Enterprise Ready, command count) plus a compliance callout referencing `CLAUDE.md`.
+- Follow immediately with the invite CTA and onboarding checklist so admins know prerequisites, scopes, and validation steps.
+- Present value props as a styled “Celeste Experience Pillars” callout to give the README a product brief tone.
+- Keep the command catalog consumer-facing: organize entries by persona (conversation, discovery, raid, moderation) with plain-language descriptions and inline parameter hints.
+- Hide deep operational details (audit logging, automations) inside collapsible `<details>` blocks to reduce clutter while keeping transparency.
+- Close with a troubleshooting table, contact paths, licensing note, and a final install CTA to reinforce support and trustworthiness.
+
+---
+
 **Last Updated:** 2025-11-27 (aligned with `CLAUDE.md` v2.0)
 **Maintained By:** whykusanagi team

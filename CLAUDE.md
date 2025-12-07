@@ -492,7 +492,188 @@ If you cannot satisfy one of these, explain why in your summary, commit message,
 
 ---
 
-**Last Updated:** 2025-11-22
-**Version:** 2.0 (Comprehensive Standards)
-**Replaces:** Version 1.0 (Project-only guide)
+## 21. GitHub README Media Guidelines (Images & Diagrams)
+
+### A. Mermaid Diagram Best Practices
+
+GitHub's mermaid renderer has strict parsing requirements. Follow these rules to ensure diagrams display correctly:
+
+#### ❌ NEVER Do This:
+```markdown
+participant LLM as LLM Provider<br/>(OpenAI/Grok)  ❌ NO HTML tags in labels
+ConfigFiles[~/.celeste/config.json<br/>secrets.json]  ❌ NO line breaks in node labels
+```
+
+#### ✅ ALWAYS Do This:
+```markdown
+participant LLM as LLM Provider  ✅ Simple text only
+ConfigFiles["~/.celeste/config.json"]  ✅ One file per node
+```
+
+#### Common Mermaid Errors and Fixes
+
+**Error: "Parse error... Expecting 'SQE', got 'DIAMOND_START'"**
+- **Cause**: HTML tags (`<br/>`) inside node labels
+- **Fix**: Remove all HTML and use separate nodes:
+  ```mermaid
+  # WRONG:
+  Config --> Files[config.json<br/>secrets.json]
+
+  # CORRECT:
+  Config --> ConfigFile["config.json"]
+  Config --> SecretFile["secrets.json"]
+  ```
+
+**Error: "Unable to render rich display"**
+- **Cause**: Complex nested structures or special characters
+- **Fix**: Simplify node labels and use standard characters only
+
+#### Mermaid Rules Summary:
+1. **Keep Labels Simple**: Plain text only, no HTML tags (`<br/>`, `<b>`, etc.)
+2. **Use Quotes for Paths**: `Storage["~/.celeste/config.json"]` ✅
+3. **One Concept Per Node**: Don't combine multiple files in one node
+4. **Test Locally**: Use mermaid-cli or VS Code extension before committing
+5. **Validate**: Check GitHub's mermaid docs for supported syntax
+
+### B. GitHub README Image Size Compliance
+
+**Critical**: Images embedded in GitHub READMEs must be under **2MB** or GitHub will reject with "Content length exceeded" errors.
+
+#### Complete 7-Step Optimization Workflow
+
+**Step 1: Check File Size**
+```bash
+# For remote images (get size in bytes)
+CURRENT_SIZE=$(curl -s -o /dev/null -w "%{size_download}" <image_url>)
+
+# For local files (get size in bytes)
+CURRENT_SIZE=$(stat -f%z <local_file> 2>/dev/null || stat -c%s <local_file> 2>/dev/null)
+
+# Display size in MB
+python3 -c "print(f'Current size: ${CURRENT_SIZE} bytes ({${CURRENT_SIZE}/1024/1024:.2f}MB)')"
+```
+- **Target size**: Aim for **1.5MB** (1,572,864 bytes) to stay safely under GitHub's 2MB limit
+
+**Step 2: Calculate Resize Percentage**
+```bash
+# Set target size (1.5MB in bytes)
+TARGET_SIZE=1572864
+CURRENT_SIZE=<size_from_step_1>  # Replace with actual size from step 1
+
+# Calculate resize percentage using Python
+# Formula: percentage = sqrt(target_size / current_size) * 100
+# This accounts for quadratic area scaling (resize 50% = 25% of area)
+RESIZE_PCT=$(python3 -c "
+import math
+pct = math.sqrt($TARGET_SIZE / $CURRENT_SIZE) * 100
+# Clamp between 20% and 95%
+pct = max(20, min(95, pct))
+print(int(pct))
+")
+
+echo "Resize percentage: ${RESIZE_PCT}%"
+```
+
+**Alternative (if Python not available)**:
+```bash
+# Conservative estimates: 60% for 2-4MB, 50% for 4-8MB, 40% for 8MB+
+if [ $CURRENT_SIZE -lt 4194304 ]; then
+  RESIZE_PCT=60
+elif [ $CURRENT_SIZE -lt 8388608 ]; then
+  RESIZE_PCT=50
+else
+  RESIZE_PCT=40
+fi
+```
+
+**Step 3: Create Optimized Version**
+```bash
+# For PNG with transparency (recommended for GitHub READMEs)
+magick input.png -strip -quality 85 -resize ${RESIZE_PCT}% output_ghub.png
+
+# For JPEG (if transparency not needed)
+magick input.jpg -strip -quality 85 -resize ${RESIZE_PCT}% output_ghub.jpg
+
+# Verify output size
+OUTPUT_SIZE=$(stat -f%z output_ghub.png 2>/dev/null || stat -c%s output_ghub.png 2>/dev/null)
+python3 -c "print(f'Output size: ${OUTPUT_SIZE} bytes ({${OUTPUT_SIZE}/1024/1024:.2f}MB)')"
+
+# If still over 2MB, reduce percentage by 10% and retry
+if [ $OUTPUT_SIZE -gt 2097152 ]; then
+  echo "Still over 2MB, reducing resize percentage..."
+  RESIZE_PCT=$((RESIZE_PCT - 10))
+  magick input.png -strip -quality 85 -resize ${RESIZE_PCT}% output_ghub.png
+fi
+```
+- **Output naming**: Use `_ghub` suffix (e.g., `cute_headshot_transparent_ghub.png`)
+
+**Step 4: Upload to R2**
+```bash
+s3cmd -c ~/.s3r2 put output_ghub.png s3://whykusanagi/optimized_assets/filename_ghub.png
+```
+- **Path structure**:
+  - Original: `art/cute_headshot_transparent.png`
+  - Optimized: `optimized_assets/cute_headshot_transparent_ghub.png`
+
+**Step 5: VERIFY HTTP Accessibility (MANDATORY - DO NOT SKIP)**
+```bash
+# Step 5a: Verify file exists in R2
+s3cmd -c ~/.s3r2 ls s3://whykusanagi/optimized_assets/filename_ghub.png
+
+# Step 5b: Verify HTTP response (must return 200 OK)
+curl -I https://s3.whykusanagi.xyz/optimized_assets/filename_ghub.png
+
+# Expected output should include:
+# HTTP/2 200
+# content-type: image/png (or image/jpeg)
+# content-length: <size in bytes>
+
+# Step 5c: Verify image downloads correctly
+curl -s -o /dev/null -w "Size: %{size_download} bytes, Status: %{http_code}\n" \
+  https://s3.whykusanagi.xyz/optimized_assets/filename_ghub.png
+```
+- **CRITICAL**: If verification fails, DO NOT commit README changes
+- **Troubleshooting**:
+  - If 404: Check R2 upload path, wait 30-60 seconds for Cloudflare cache propagation
+  - If wrong content-type: Verify file extension matches actual format
+
+**Step 6: Update README**
+```markdown
+<img src="https://s3.whykusanagi.xyz/optimized_assets/filename_ghub.png"
+     alt="Description"
+     width="300"/>
+```
+
+**Step 7: Keep Original**
+- Preserve high-quality version in `art/` for blog posts and other uses
+
+#### Image Display Size Recommendations
+
+| Image Original Size | Recommended Width | Use Case |
+|---------------------|-------------------|----------|
+| < 1 MB | 400-500px | Header images, logos |
+| 1-5 MB | 300-400px | Character art, screenshots |
+| 5-10 MB | 200-300px | High-res artwork |
+| > 10 MB | Link only | Don't embed, use external link |
+
+#### Example: Proper Image Display
+```markdown
+<div align="center">
+  <img src="https://s3.whykusanagi.xyz/optimized_assets/character_ghub.png"
+       alt="Character Name - Description"
+       width="300"/>
+</div>
+```
+
+**Why this works**:
+- Uses direct S3 URL with optimized `_ghub` version (under 2MB)
+- Explicit width prevents rendering issues
+- Descriptive alt text for accessibility
+- Centered for visual appeal
+
+---
+
+**Last Updated:** 2025-12-06
+**Version:** 2.1 (Added GitHub Media Guidelines)
+**Replaces:** Version 2.0 (Comprehensive Standards)
 **Maintained By:** whykusanagi team

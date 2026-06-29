@@ -479,6 +479,108 @@ If you cannot satisfy one of these, explain why in your summary, commit message,
 - ✅ "From my archives, I recall..."
 - ✅ "That's not ringing any bells for me right now, but..."
 
+### Visual & UI Standards: Corrupted Theme
+
+**Primary Reference:** `docs/CORRUPTED_THEME_SPEC.md`
+
+All UI elements, overlays, and visual effects for Celeste-related projects must follow the **Corrupted Theme** aesthetic:
+
+#### Color Palette (Required)
+```css
+--corrupted-cyan:     #00ffff;  /* Stable text, decoded state */
+--corrupted-purple:   #8b5cf6;  /* Deep corruption (lewd phrases) */
+--corrupted-magenta:  #d94f90;  /* Surface corruption (glitches) */
+--corrupted-red:      #ff0000;  /* Critical/terminal state */
+```
+
+#### Corruption Patterns (Choose One)
+1. **Character-by-Character Decoding**: Final text emerges letter-by-letter from chaos
+   - Use: Loading states, progressive reveals, decryption sequences
+   - Example: `闇が... → N好き... → Ne許... → Neural corruption detected...`
+
+2. **Phrase Flickering (Buffer)**: Rapid cycling through complete lewd phrases
+   - Use: Buffering states, dramatic reveals, error→recovery transitions
+   - Example: Flicker 10+ lewd phrases → settle on English
+
+3. **Hybrid Decoding**: Combines both (character decoding WITH phrase flickering in buffer)
+   - Use: Maximum chaos effects, high-intensity corruption
+   - Example: ShiftUp countdown (decodes while ticking 100% → 0%)
+
+#### Character Sets for Corruption
+- **Katakana** (アイウエオ...): Primary visual corruption, Matrix aesthetic
+- **Hiragana** (あいうえお...): Softer corruption, intimate degradation
+- **Lewd Phrases** (闇が...私を呼んでいる...): Deep corruption (18+ content, opt-in)
+- **Block Chars** (█▓▒░): Severe corruption, data loss
+- **Symbols** (★☆♥♡✧): Decorative glitches
+
+#### Key Principles
+- **Chaos → Order**: Information always emerges FROM corruption (never degrades into it)
+- **Readable Endpoints**: Final state must be cyan (#00ffff) and fully readable
+- **Motion = Instability**: Static = stable, animated = corrupted
+- **Japanese = Unknown**: Use Japanese for "unreadable" corruption states
+
+#### Glass Morphism (Containers)
+```css
+background: rgba(0, 0, 0, 0.7);
+backdrop-filter: blur(10px);
+border: 2px solid rgba(0, 255, 255, 0.3);
+box-shadow:
+    0 0 20px rgba(0, 255, 255, 0.5),
+    0 0 40px rgba(255, 0, 255, 0.3);
+```
+
+#### Content Warnings
+- ⚠️ Lewd Japanese phrases are 18+ content - use only for mature projects
+- ⚠️ Rapid flickering may trigger photosensitivity - limit to 100ms+ intervals
+- ⚠️ Always provide stable, readable final state for accessibility
+
+#### Package Integration
+When using `@whykusanagi/corrupted-theme` (future package):
+```javascript
+import { CorruptedText } from '@whykusanagi/corrupted-theme';
+
+const corrupted = new CorruptedText(element, {
+    pattern: 'decoding',  // or 'flickering', 'hybrid'
+    finalText: 'System Online',
+    includeLewd: false    // Opt-in for mature content
+});
+```
+
+For implementation details, algorithms, and complete character sets, see:
+- **Full Specification**: `docs/CORRUPTED_THEME_SPEC.md`
+- **Overlay Implementation**: `obs/event-overlay.html`
+- **Buffer Style Examples**: `docs/TEXT_OVERLAY_BUFFER_STYLES.md`
+
+---
+
+## 15. Generalized Engineering Practices (Cross-Project)
+
+These are project-agnostic rules distilled from working agreements across many repos. They complement, not replace, the sections above.
+
+### 15.1. Commit & Hook Discipline
+- **Separate commit from push.** Do not chain `git commit && git push` in a single command. Pushing is outward-facing and harder to reverse — it deserves its own decision after the commit is reviewed.
+- **Never bypass pre-commit hooks** (`--no-verify`, skipping CI checks locally). If a hook fails — lint, type-check, unused-export, formatting — fix the cause, even if it predates your change. A green hook is the contract; silencing it ships the defect.
+
+### 15.2. Shipping User-Facing Features
+- **Smoke-test real paths before shipping.** Exercise the actual code path with real inputs end-to-end. Passing unit tests are not a substitute — mocks hide integration failures.
+- **Gate incomplete work behind feature flags that default to off.** Flip the flag in the *same commit* that wires up the feature, never earlier. Do not commit half-finished, user-visible stubs to a shared branch — keep them local or behind the flag.
+- **Version bumps are deliberate.** Only bump a published version when explicitly authorized; releases are a decision, not a side effect of editing code.
+
+### 15.3. Interface & Contract Consistency
+- **One case per boundary.** Over-the-wire contracts (API request/response JSON, tool/function parameters, config schemas) use one consistent convention (e.g. `snake_case`); internal code keeps its own idiom (e.g. `camelCase`). Never mix casing within a single wire schema.
+- **Keep contracts and docs in lockstep.** A change to an API field, tool parameter, or schema is incomplete until its documentation is updated in the same change.
+- **Don't advertise what hasn't shipped.** No documenting tools, parameters, features, or version numbers that aren't released yet. Sync docs and bump versions only when the capability actually exists.
+
+### 15.4. Library & Package Release Hygiene
+*(Applies when the repo publishes a package or library others consume.)*
+- **Semantic versioning for breaking changes.** Removing/renaming an export or changing behavior requires a major bump, a migration note, and ideally a one-minor-version deprecation window before removal. Propose breaking changes via an issue first, not unilaterally.
+- **Single source of version truth.** Keep the version synchronized across the manifest (`package.json`/`pyproject.toml`/etc.), lockfile, README examples, and CHANGELOG. Regenerate the lockfile after a bump and verify with a clean install.
+- **Inspect before you publish.** Build the artifact and inspect its contents (e.g. `npm pack` and read the tarball) to confirm no dev/secret/spec files leak. Prefer publishing through CI/CD over a local `publish` command.
+
+### 15.5. Test Isolation & Deploy Promotion
+- **Isolate test data.** Run tests against a throwaway database/datastore selected by an env var (e.g. `DATA_DIR=/tmp/test`), not the production store. Never commit production databases; gitignore them and document migrations separately.
+- **Promote, don't leap.** Validate in a dev/staging environment before production. After deploying, watch logs/metrics for new errors and have a rollback path ready — a deploy isn't "done" until it shows no new errors.
+
 ---
 
 ## 20. Public README Branding Playbook

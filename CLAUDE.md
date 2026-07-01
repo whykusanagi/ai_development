@@ -500,11 +500,20 @@ These are project-agnostic rules distilled from working agreements across many r
 
 **Consistency is not negotiable. Code must match the project's established conventions — an agent's job is to extend the codebase, never to re-style it.**
 
-### 16.1. Naming & Style
-- **House style is `snake_case` for identifiers** — variables, functions, keys, file names — wherever the language allows it.
-- **NEVER change a project's coding practices.** Do not switch naming schemes, reformat, re-indent, swap quote styles, or "modernize" idioms mid-project. Match the file you are editing exactly.
-- Where a language enforces a different idiom at a boundary (e.g. Go exported identifiers, framework-required camelCase, JSON/wire contracts), follow §15.3: one consistent convention per boundary — `snake_case` on data/wire, the language's idiom internally — and **never introduce a third style or mix styles within one file.**
-- A style you personally prefer is not a reason to change existing code. If the convention is genuinely wrong, raise it as a separate, explicit refactor — not a silent drift inside a feature change.
+### 16.1. Required Per-Language Conventions
+Each language has ONE required convention set. These are non-negotiable, enforced by the language's standard formatter/linter, and take precedence over any personal preference.
+
+| Language | Identifiers | Types / Classes | Constants | Formatter / Linter (required) | Indent |
+|----------|-------------|-----------------|-----------|-------------------------------|--------|
+| **Go** | `mixedCaps` (unexported), `PascalCase` (exported) — **never `snake_case`** | `PascalCase` | `PascalCase` (exported) | `gofmt`/`goimports` + `golangci-lint`; package names lowercase, no underscores | tabs |
+| **Python** | `snake_case` functions/vars/modules | `PascalCase` | `UPPER_SNAKE_CASE` | `ruff`/`black` (PEP 8) | 4 spaces |
+| **JavaScript** | `camelCase` | `PascalCase` (classes/components) | `UPPER_SNAKE_CASE` | `prettier` + `eslint` | 2 spaces |
+| **TypeScript** | `camelCase` | `PascalCase` (types, interfaces, enums — no `I` prefix) | `UPPER_SNAKE_CASE` | `prettier` + `eslint`/`biome` | 2 spaces |
+| **CSS** | `kebab-case` classes; custom props `--kebab-case` | — | `--kebab-case` tokens | `stylelint` (or theme package's config) | 2 spaces |
+
+- **Data / wire boundary is always `snake_case`** regardless of language: JSON keys, API request/response fields, tool/function parameters, config schemas, DB columns (see §15.3). The language idiom applies to *internal* code only; never mix the two within one file.
+- **NEVER change a project's coding practices.** Do not switch naming schemes, reformat, re-indent, swap quote styles, or "modernize" idioms mid-feature. Match the file you are editing exactly, and run the formatter above rather than hand-styling.
+- A style you personally prefer is not a reason to touch existing code. If a convention is genuinely wrong, raise it as a separate, explicit refactor — never a silent drift inside a feature change.
 
 ### 16.2. Review Subagent-Written Code Early
 - **Any code produced by a subagent must be reviewed against these standards immediately — before more work is layered on top.** Do not wait until the feature is "done."

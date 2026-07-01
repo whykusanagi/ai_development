@@ -101,9 +101,34 @@ Pick per project; gate every deploy job on branch + event and `needs: [build]`:
 
 ---
 
+## 7. CI/CD Cost Efficiency — run expensive jobs only when needed
+
+CI minutes are not free, and the expensive minutes (native Windows/macOS runners, multi-arch binary builds, full packaging/signing) are the ones you want to spend **rarely**. The goal: fast, cheap validation on every PR; heavy builds only when cutting a release.
+
+**Tier the work by trigger:**
+
+| Runs on | Jobs | Rationale |
+|---------|------|-----------|
+| **Every PR + push** (cheap, fast) | format, lint, vet, **unit tests**, quick single-platform compile check, secret scan, dependency audit | This is the quality gate — must run every time, but it's all cheap Linux minutes. |
+| **Release only** (`push: tags: ['v*']` / release event) | cross-platform binary matrix, **native Windows/macOS runners**, multi-arch builds, full packaging + checksums + signing, all-platform image builds | Expensive and only meaningful at release. Do **not** attach these to `pull_request`. |
+| **On demand / nightly** (`workflow_dispatch` / `schedule`) | full cross-platform build if you want pre-release confidence, heavy e2e, scheduled security scans | Opt-in, not per-PR. |
+
+**Concrete rules:**
+- **Never build release binaries on `pull_request`.** A Windows runner spinning up to cross-compile on every PR is pure waste — that job belongs on the tag/release trigger only. Validate *that it compiles* on one platform in PR CI; build *all platforms* at release.
+- **Don't run the full OS matrix on every PR.** Run the primary platform (e.g. `ubuntu-latest`) on PRs; run the `[ubuntu, macos, windows]` matrix only at release or nightly. Reserve cross-platform for when a platform-specific bug would actually ship.
+- **Dependabot PRs get the cheap tier only.** A dependency bump needs lint + test + audit, not a Windows binary build. Combined with grouping + auto-merge (`RELEASE.md` §3), they cost minutes, not hours, and clear themselves.
+- **Skip work that can't be affected:** `paths-ignore` for docs/media-only changes; `concurrency: cancel-in-progress` to kill superseded runs; cache dependencies + Docker layers (§2) so re-runs are cheap.
+- **Restrict build platforms to what you deploy** (`platforms: linux/amd64`) rather than building arches you never ship (§4).
+- **Split workflows by trigger** (a `ci.yml` on `pull_request`, a separate `release.yml` on `tags`) so the expensive file simply never fires on PRs — the cleanest way to guarantee the separation.
+
+> Net effect: a feature PR or a dependabot bump runs minutes of cheap Linux CI; the multi-platform, signed binary build happens once, when you actually tag a release.
+
+---
+
 ## Checklist
 
 - [ ] PR-gated CI with cancel-superseded concurrency and least-privilege permissions.
+- [ ] Expensive builds (native Windows/macOS, multi-arch binaries) run on release/tags only — never on PRs or dependabot.
 - [ ] Format/lint/test are hard failures; coverage threshold enforced.
 - [ ] Build gated behind quality jobs; full-artifact compile validated.
 - [ ] Dependency + Docker-layer caching keyed on lockfile.

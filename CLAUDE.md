@@ -403,56 +403,30 @@ If you cannot satisfy one of these, explain why in your summary, commit message,
 
 ## 13. Project-Specific: whykusanagi Portfolio Site
 
-### Setup & Tech Stack
-- **Framework:** Static HTML5/CSS3/JavaScript (no build system)
-- **Hosting:** S3/Cloudflare R2 (images), static file hosting (HTML/CSS/JS)
-- **Deployment:** Git push to main → Cloudflare Workers → live
-- **Local Development:** `python3 -m http.server 8000`
+**Directives for agents working in the portfolio-site repo. These are rules to follow, not a status report — obey them, don't restate them.**
 
-### File Organization
-- HTML pages acceptable in root (static site pattern)
-- CSS/theme: provided by the `@whykusanagi/corrupted-theme` npm package (no local `theme.css`/`style.css`)
-- JavaScript: `assets/js/loading.js` (core), `src/lib/celeste-widget.js`, `src/3d/three-vrm-viewer.js`
-- Data: `art.json`, `boss.json` in repo root; `celeste-context-schemas.json` in `static/data/`
-- Cloudflare Worker: `src/index.js`
+### Build & Deploy
+- Static HTML/CSS/JS, no build system. Preview locally with `python3 -m http.server 8000` (documented exception to the Docker-first rule in §5).
+- Deploys are automatic: merge to `main` → Cloudflare Workers → live. Do **not** run manual or ad-hoc deploys.
 
-### Celeste AI Widget
-- Fetches configuration from `celesteCLI` repo at runtime (celeste_essence.json)
-- Widget code in `src/lib/celeste-widget.js`, shipped via the `@whykusanagi/corrupted-theme` package
-- Known issue: Secrets in widget require testing to refactor (see Section 4 - future `feature/secrets-refactor` branch)
-- 3D viewer: `src/3d/three-vrm-viewer.js` (Three.js + three-vrm library)
+### Theme & UI
+- Consume the `@whykusanagi/corrupted-theme` package for all styling and corruption effects (see §9.3). Never author local `theme.css`/`style.css` or reimplement theme components.
 
-### Testing Requirements
-- **Manual browser testing** only (no automated suite)
-- **Responsive design:** Test at 1000px breakpoint (mobile → desktop)
-- **Cross-browser:** Chrome, Firefox, Safari, Edge
-- **CSS features:** Verify backdrop-filter blur, CSS Grid, animations
-- **Celeste integration:** Widget loads, responds in-character, detects page context
-- See `docs/testing.md` for comprehensive testing procedures
+### Asset Storage (Cloudflare R2)
+- Store images / 3D models / media in R2 via `s3cmd` using the `~/.s3r2` config.
+- **Always use `s3cmd put`. NEVER use `s3cmd sync`** — `sync` can bulk-delete or overwrite remote objects; `put` is explicit and scoped to the files you name.
+- Upload **only** media assets, and **only** on explicit request. NEVER upload secrets, `CLAUDE.md`, or troubleshooting notes (§6).
+- Endpoint and full procedures: `docs/storage.md`.
 
-### S3/R2 Upload Guidelines
-- **Endpoint:** `https://s3.whykusanagi.xyz/`
-- **Tool:** s3cmd with `~/.s3r2` config
-- **Only upload:** Images, 3D models, media (via explicit user request)
-- **Never upload:** Secrets, CLAUDE.md, troubleshooting notes
-- **Documentation:** See `docs/storage.md` for full procedures and examples
+### Config & Secrets
+- Runtime widget config is fetched from the `celesteCLI` repo (`celeste_essence.json`) — do not hardcode config that belongs there.
+- Agent endpoints/IDs currently live in `static/data/celeste-context-schemas.json`; treat that file as sensitive and do **not** add new hardcoded secrets. Migration to Cloudflare Workers env vars is pending (§4).
 
-### Configuration Management
-- **Agent endpoints/IDs:** Currently hardcoded in `static/data/celeste-context-schemas.json`
-- **Status:** ⚠️ Needs migration to Cloudflare Workers env vars
-- **Migration plan:** `feature/secrets-refactor` branch (deferred)
-- See `docs/environment.md` for all environment variable details
-
-### Known Issues & Future Work
-1. **Secrets in celeste-widget.js** (HIGH PRIORITY)
-   - Issue: API key and config values in code
-   - Status: Documented, deferred to avoid context rabbit-hole
-   - Plan: Create `feature/secrets-refactor` branch after major improvements
-   - Testing required: Extensive validation needed to refactor safely
-
-2. **File reorganization** (IN PROGRESS)
-   - Done: JS moved into `src/lib/`, `src/3d/`, `assets/js/`; theme extracted to the `@whykusanagi/corrupted-theme` package
-   - Remaining: root still holds ~50 files (HTML pages, `art.json`, `boss.json`) to sort into `config/`, `scripts/`, etc.
+### Testing (manual browser only — no automated suite)
+- Test the 1000px breakpoint (mobile ↔ desktop) across Chrome, Firefox, Safari, Edge.
+- Verify `backdrop-filter` blur, CSS Grid, and animations render.
+- Verify the Celeste widget loads, responds in-character, and detects page context.
+- Full procedures: `docs/testing.md`.
 
 ---
 
@@ -484,75 +458,11 @@ If you cannot satisfy one of these, explain why in your summary, commit message,
 
 ### Visual & UI Standards: Corrupted Theme
 
-**Primary Reference:** `docs/CORRUPTED_THEME_SPEC.md`
+**The `@whykusanagi/corrupted-theme` package is the single source of truth for all corruption aesthetics — color palette, corruption patterns, character sets, glass-morphism containers, and accessibility/content-warning behavior.**
 
-All UI elements, overlays, and visual effects for Celeste-related projects must follow the **Corrupted Theme** aesthetic:
-
-#### Color Palette (Required)
-```css
---corrupted-cyan:     #00ffff;  /* Stable text, decoded state */
---corrupted-purple:   #8b5cf6;  /* Deep corruption (lewd phrases) */
---corrupted-magenta:  #d94f90;  /* Surface corruption (glitches) */
---corrupted-red:      #ff0000;  /* Critical/terminal state */
-```
-
-#### Corruption Patterns (Choose One)
-1. **Character-by-Character Decoding**: Final text emerges letter-by-letter from chaos
-   - Use: Loading states, progressive reveals, decryption sequences
-   - Example: `闇が... → N好き... → Ne許... → Neural corruption detected...`
-
-2. **Phrase Flickering (Buffer)**: Rapid cycling through complete lewd phrases
-   - Use: Buffering states, dramatic reveals, error→recovery transitions
-   - Example: Flicker 10+ lewd phrases → settle on English
-
-3. **Hybrid Decoding**: Combines both (character decoding WITH phrase flickering in buffer)
-   - Use: Maximum chaos effects, high-intensity corruption
-   - Example: ShiftUp countdown (decodes while ticking 100% → 0%)
-
-#### Character Sets for Corruption
-- **Katakana** (アイウエオ...): Primary visual corruption, Matrix aesthetic
-- **Hiragana** (あいうえお...): Softer corruption, intimate degradation
-- **Lewd Phrases** (闇が...私を呼んでいる...): Deep corruption (18+ content, opt-in)
-- **Block Chars** (█▓▒░): Severe corruption, data loss
-- **Symbols** (★☆♥♡✧): Decorative glitches
-
-#### Key Principles
-- **Chaos → Order**: Information always emerges FROM corruption (never degrades into it)
-- **Readable Endpoints**: Final state must be cyan (#00ffff) and fully readable
-- **Motion = Instability**: Static = stable, animated = corrupted
-- **Japanese = Unknown**: Use Japanese for "unreadable" corruption states
-
-#### Glass Morphism (Containers)
-```css
-background: rgba(0, 0, 0, 0.7);
-backdrop-filter: blur(10px);
-border: 2px solid rgba(0, 255, 255, 0.3);
-box-shadow:
-    0 0 20px rgba(0, 255, 255, 0.5),
-    0 0 40px rgba(255, 0, 255, 0.3);
-```
-
-#### Content Warnings
-- ⚠️ Lewd Japanese phrases are 18+ content - use only for mature projects
-- ⚠️ Rapid flickering may trigger photosensitivity - limit to 100ms+ intervals
-- ⚠️ Always provide stable, readable final state for accessibility
-
-#### Package Integration
-When using `@whykusanagi/corrupted-theme` (future package):
-```javascript
-import { CorruptedText } from '@whykusanagi/corrupted-theme';
-
-const corrupted = new CorruptedText(element, {
-    pattern: 'decoding',  // or 'flickering', 'hybrid'
-    finalText: 'System Online',
-    includeLewd: false    // Opt-in for mature content
-});
-```
-
-For implementation details, algorithms, and complete character sets, see:
-- **Full Specification**: `docs/CORRUPTED_THEME_SPEC.md`
-- **Overlay Implementation**: `obs/event-overlay.html`
-- **Buffer Style Examples**: `docs/TEXT_OVERLAY_BUFFER_STYLES.md`
+- Import the theme's components and tokens; do not copy or re-specify its colors, patterns, or algorithms here or anywhere else. Duplicated specs drift from the package and go stale (this section used to, and did).
+- Extend via the package's documented API. Custom overrides only when the package genuinely can't express the requirement, documented beside the code (see §9.3).
+- For the actual palette, pattern algorithms, character sets, and usage examples, read the package's own README/docs — that is what ships and what stays current.
 
 ---
 
@@ -583,6 +493,24 @@ These are project-agnostic rules distilled from working agreements across many r
 ### 15.5. Test Isolation & Deploy Promotion
 - **Isolate test data.** Run tests against a throwaway database/datastore selected by an env var (e.g. `DATA_DIR=/tmp/test`), not the production store. Never commit production databases; gitignore them and document migrations separately.
 - **Promote, don't leap.** Validate in a dev/staging environment before production. After deploying, watch logs/metrics for new errors and have a rollback path ready — a deploy isn't "done" until it shows no new errors.
+
+---
+
+## 16. Coding Standards & Convention Enforcement
+
+**Consistency is not negotiable. Code must match the project's established conventions — an agent's job is to extend the codebase, never to re-style it.**
+
+### 16.1. Naming & Style
+- **House style is `snake_case` for identifiers** — variables, functions, keys, file names — wherever the language allows it.
+- **NEVER change a project's coding practices.** Do not switch naming schemes, reformat, re-indent, swap quote styles, or "modernize" idioms mid-project. Match the file you are editing exactly.
+- Where a language enforces a different idiom at a boundary (e.g. Go exported identifiers, framework-required camelCase, JSON/wire contracts), follow §15.3: one consistent convention per boundary — `snake_case` on data/wire, the language's idiom internally — and **never introduce a third style or mix styles within one file.**
+- A style you personally prefer is not a reason to change existing code. If the convention is genuinely wrong, raise it as a separate, explicit refactor — not a silent drift inside a feature change.
+
+### 16.2. Review Subagent-Written Code Early
+- **Any code produced by a subagent must be reviewed against these standards immediately — before more work is layered on top.** Do not wait until the feature is "done."
+- Review specifically for: convention violations (naming/style drift), and **wrong code paths** — calls into the wrong module, invented APIs, wrong import paths, functions that don't match the real signatures in the repo.
+- **Why this is early, not late:** a subagent that guesses a code path builds a feature on a foundation that doesn't exist. If that isn't caught immediately, later work compounds on the broken path and the whole feature ends up wrong and expensive to unwind. Catch the drift while it's one file, not ten.
+- Practical gate: after a subagent returns code, diff it against the surrounding code and verify every external reference (import, function, field) actually resolves in the repo before continuing.
 
 ---
 

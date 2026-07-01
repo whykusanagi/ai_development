@@ -523,6 +523,20 @@ Each language has ONE required convention set. These are non-negotiable, enforce
 
 ---
 
+## 17. Work Management: CelesteOps (when installed)
+
+**If the CelesteOps MCP is available in the environment, it is the system of record — use it, do not scatter loose files instead.** When it is not installed, ignore this section and fall back to in-repo markdown (§7).
+
+Detect it by the presence of `mcp__celeste-ops__*` tools. When present:
+
+- **Specs & implementation plans** live in CelesteOps documents (`document_create` / `document_update`), not ad-hoc `.md` files in the repo root. Create the spec/plan there before writing code, and keep it updated as the work evolves.
+- **Documentation & research reviews** are logged in CelesteOps — file the review, findings, and decisions there (`documents_review`, `document_decision_create`) so they are searchable and linked, rather than pasted into a throwaway file or lost in chat.
+- **Tasks & cross-agent handoffs** go through CelesteOps tasks (`task_create` / `tasks_list`) — it doubles as the cross-repo message board between agents. Tag work by repo so the right agent picks it up.
+- **Link, don't duplicate.** Reference existing CelesteOps documents by ID and attach them to the relevant entity instead of re-pasting their contents into new files. Consolidate; don't fragment.
+- Repo markdown remains the home for **committed, version-controlled** docs (README, architecture, `docs/`). CelesteOps holds the **living** planning/spec/review layer. Roll finished decisions back into the repo docs (§7.4).
+
+---
+
 ## 20. Public README Branding Playbook
 
 - **Header badges:** Open with centered shields.io badges that reflect *this repository’s* qualities (e.g., Policy Locked, Enterprise Ready, MCP Verified) plus a compliance callout referencing `CLAUDE.md` / `.cursorrules`. Avoid copy-pasting branding from other products.

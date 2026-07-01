@@ -537,6 +537,18 @@ Detect it by the presence of `mcp__celeste-ops__*` tools. When present:
 
 ---
 
+## 18. Release Readiness & Branch Hygiene
+
+Full process and checklists: **`RELEASE.md`**. Core directives an agent must follow:
+
+- **A release is a gated event, not a side effect of pushing.** Do not cut a release until the Definition of Done in `RELEASE.md` §1 is fully green (CI passing, CVEs clear, secrets clean, CHANGELOG + version correct, docs updated, smoke-tested, rollback known).
+- **Release flow is automated:** merge features via PR → the release-automation bot's standing release PR accumulates the version bump + CHANGELOG → merging that PR tags the release → the tag triggers a signed, checksummed build (`IAC.md` §3).
+- **Every branch is merged or deleted — no third state.** Delete the head branch on merge; close-and-delete dead PRs (capture anything worth keeping as a task/§17 note first). Prune branches stale >30 days with no open PR.
+- **Don't let PRs rot:** one logical change per PR; a PR open >14 days is merged or closed with a reason; WIP goes in draft PRs.
+- **Dependabot must not pile up:** group updates, cap with `open-pull-requests-limit`, auto-merge passing patch/minor bumps, hand-review only majors.
+
+---
+
 ## 20. Public README Branding Playbook
 
 - **Header badges:** Open with centered shields.io badges that reflect *this repository’s* qualities (e.g., Policy Locked, Enterprise Ready, MCP Verified) plus a compliance callout referencing `CLAUDE.md` / `.cursorrules`. Avoid copy-pasting branding from other products.

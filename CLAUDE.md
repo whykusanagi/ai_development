@@ -171,6 +171,7 @@ When in doubt: **favor clarity, rollback safety, and minimal blast radius.**
      - `scripts/`, `tools/`, `migrations/`,
      - `assets/`, `art/`, `media/`.
    - Avoid dumping large numbers of files into the repo root.
+   - **For websites and web apps this is an always-enforced convention, not an app-by-app choice.** Source belongs in structured folders from the first file — code in `src/` (e.g. `src/lib/`, `src/3d/`), static assets in `assets/` (e.g. `assets/js/`, `assets/css/`), data/config in their own folders. Don't accumulate loose files in root and defer the cleanup; organize as you build.
 
 2. **Utility & troubleshooting scripts**
    - Place utility or troubleshooting scripts in dedicated folders, e.g.:
@@ -263,10 +264,13 @@ These complement the repo-specific rules above:
 - Reference the source you followed (link to docs/Stack Overflow/GitHub) so reviewers know the origin.
 - Reinventing the wheel is acceptable only if no suitable reference exists; document that research was performed.
 
-### 9.3. Prefer existing theme imports
-- When a project already ships CSS/JS themes (e.g. `@whykusanagi/corrupted-theme`), import and extend those components instead of duplicating styles.
-- Custom overrides are allowed **only** when the base package cannot express the requirement; document the reason near the code.
-- Never fork theme assets into random folders—use the canonical import path so updates stay centralized.
+### 9.3. Design system first (OEM before new UI)
+This is a **hard gate for any UI work — websites, web apps, dashboards, overlays, docs sites.** It is a standing design choice, not a per-project decision.
+
+- **Adopt the established first-party/OEM component library and brand spec BEFORE writing any new UI.** If the project (or org) ships a design system or theme package — e.g. `@whykusanagi/corrupted-theme` — import and extend its components. Reaching for new markup/CSS is the *last* resort, not the first.
+- **New UI that deviates from the brand spec is out of compliance and must not ship by default.** If a component genuinely can't be expressed by the design system, that is a gap to document and justify near the code (and ideally raise upstream), not a license to freehand a one-off.
+- **Never fork or copy theme assets into random folders** — always consume the canonical import path so upstream updates stay centralized. Custom overrides live beside the component and cite the reason.
+- **Order of operations for a new component:** (1) use an existing design-system component as-is → (2) compose/extend existing components → (3) override with documented reason → (4) only then, net-new code, flagged as a brand-spec gap.
 
 ---
 

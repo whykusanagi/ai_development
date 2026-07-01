@@ -407,16 +407,16 @@ If you cannot satisfy one of these, explain why in your summary, commit message,
 
 ### File Organization
 - HTML pages acceptable in root (static site pattern)
-- CSS files: `theme.css` (main), `style.css` (legacy)
-- JavaScript: `loading.js` (core), `celeste-widget.js`, `three-vrm-viewer.js`
-- Data: `art.json`, `boss.json` in `static/data/`
+- CSS/theme: provided by the `@whykusanagi/corrupted-theme` npm package (no local `theme.css`/`style.css`)
+- JavaScript: `assets/js/loading.js` (core), `src/lib/celeste-widget.js`, `src/3d/three-vrm-viewer.js`
+- Data: `art.json`, `boss.json` in repo root; `celeste-context-schemas.json` in `static/data/`
 - Cloudflare Worker: `src/index.js`
 
 ### Celeste AI Widget
-- Fetches configuration from `celesteCLI` repo at runtime (celeste_essence.json, routing_rules.json)
-- Widget code in `celeste-widget.js` (37KB)
+- Fetches configuration from `celesteCLI` repo at runtime (celeste_essence.json)
+- Widget code in `src/lib/celeste-widget.js`, shipped via the `@whykusanagi/corrupted-theme` package
 - Known issue: Secrets in widget require testing to refactor (see Section 4 - future `feature/secrets-refactor` branch)
-- 3D viewer: `three-vrm-viewer.js` (Three.js + three-vrm library)
+- 3D viewer: `src/3d/three-vrm-viewer.js` (Three.js + three-vrm library)
 
 ### Testing Requirements
 - **Manual browser testing** only (no automated suite)
@@ -446,10 +446,9 @@ If you cannot satisfy one of these, explain why in your summary, commit message,
    - Plan: Create `feature/secrets-refactor` branch after major improvements
    - Testing required: Extensive validation needed to refactor safely
 
-2. **File reorganization** (MEDIUM PRIORITY)
-   - Current: 35 files in root directory
-   - Plan: Move to `assets/css/`, `src/lib/`, `scripts/`, `config/`, etc.
-   - Deferred: After critical documentation complete
+2. **File reorganization** (IN PROGRESS)
+   - Done: JS moved into `src/lib/`, `src/3d/`, `assets/js/`; theme extracted to the `@whykusanagi/corrupted-theme` package
+   - Remaining: root still holds ~50 files (HTML pages, `art.json`, `boss.json`) to sort into `config/`, `scripts/`, etc.
 
 ---
 

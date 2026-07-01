@@ -1,6 +1,6 @@
 # Cursor Rules for Repo Guardrails Template
 
-This file is the operational contract for every AI assistant working in this repository. It mirrors the authoritative guidance in `CLAUDE.md` so all entry points communicate the same standards and expectations.
+This file is the operational contract for every AI assistant working in this repository. It mirrors the authoritative guidance in `CLAUDE.md` so all entry points communicate the same standards and expectations. Detailed policy for coding standards, releases, CI/CD, and security lives in `CLAUDE.md` and the companion docs (`IAC.md`, `SECURITY.md`, `RELEASE.md`) — those are authoritative; §21 below is the quick reference.
 
 ---
 
@@ -119,28 +119,13 @@ This file is the operational contract for every AI assistant working in this rep
 
 ## 13. Project-Specific: whykusanagi Portfolio Site
 
-- **Framework:** Static HTML/CSS/JS; hosting on S3/Cloudflare R2 with static site hosting.
-- **Deployment:** Git push → Cloudflare Workers → live; local dev via `python3 -m http.server 8000`.
-- HTML pages allowed in root; CSS (`theme.css`, `style.css`), JS (`loading.js`, `celeste-widget.js`, `three-vrm-viewer.js`), data (`static/data/`), Cloudflare Worker (`src/index.js`).
-- Celeste AI widget fetches config from `celesteCLI` repo at runtime; secrets currently embedded (plan: `feature/secrets-refactor`).
-- Known backlog: secrets refactor, file re-org to `assets/`, `src/`, `scripts/`, etc.
+Directives for agents in the portfolio-site repo — rules to follow, not a status report. (Full version: `CLAUDE.md` §13.)
 
-### Testing Requirements
-
-- Manual browser testing only.
-- Validate 1000px breakpoint, cross-browser (Chrome/Firefox/Safari/Edge), CSS features (backdrop-filter, grid, animations).
-- Verify Celeste widget loads, stays in-character, detects page context.
-- See `docs/testing.md` for procedures.
-
-### S3/R2 Guidelines
-
-- Endpoint `https://s3.whykusanagi.xyz/`; use `s3cmd` with `~/.s3r2`.
-- Upload only images/3D/media when explicitly requested; never upload secrets or policy docs.
-
-### Configuration Management
-
-- Agent endpoints/IDs currently live in `static/data/celeste-context-schemas.json`; migration to Cloudflare Worker env vars is pending on `feature/secrets-refactor`.
-- `docs/environment.md` tracks environment variable details.
+- **Build & deploy:** static HTML/CSS/JS, no build system; preview via `python3 -m http.server 8000`. Deploys are automatic on merge to `main` → Cloudflare Workers. No manual deploys.
+- **Theme & UI:** consume the `@whykusanagi/corrupted-theme` package for all styling/corruption effects. Never author local `theme.css`/`style.css` or reimplement theme components.
+- **Asset storage (R2):** store images/3D/media via `s3cmd` with `~/.s3r2`. **Always `s3cmd put`; NEVER `s3cmd sync`** (sync can bulk-delete/overwrite). Upload only media, only on explicit request; never secrets, `CLAUDE.md`, or notes.
+- **Config & secrets:** runtime config is fetched from `celesteCLI` (`celeste_essence.json`) — don't hardcode it. Treat `static/data/celeste-context-schemas.json` as sensitive; add no new hardcoded secrets (Workers env-var migration pending).
+- **Testing (manual browser only):** 1000px breakpoint across Chrome/Firefox/Safari/Edge; verify backdrop-filter, CSS Grid, animations; verify the Celeste widget loads, stays in-character, detects page context. See `docs/testing.md`.
 
 ---
 
@@ -405,5 +390,40 @@ Best practices: always check first, verify after, inspect logs, prefer MCP tooli
 
 ---
 
-**Last Updated:** 2025-11-27 (aligned with `CLAUDE.md` v2.0)
+## 21. Engineering Standards & Companion Policies (mirrors CLAUDE.md §15–18)
+
+Quick reference. The authoritative detail lives in `CLAUDE.md` and the companion docs — read those; don't duplicate them.
+
+### Coding Standards (CLAUDE.md §16)
+- Required per-language conventions: **Go** `mixedCaps`/`PascalCase` (never snake_case; gofmt) · **Python** `snake_case`/`PascalCase`/`UPPER_SNAKE` (ruff/black, 4-space) · **JS/TS** `camelCase`/`PascalCase`/`UPPER_SNAKE` (prettier+eslint, 2-space; TS types `PascalCase`, no `I` prefix) · **CSS** `kebab-case` + `--kebab-case` (stylelint).
+- Data/wire boundary (JSON keys, API fields, tool params, DB columns) is always `snake_case`, every language.
+- Never change a project's established conventions mid-feature; run the formatter, don't hand-style.
+- Review subagent-written code immediately for style drift **and wrong code paths** (invented APIs, wrong imports/signatures) before building on top.
+
+### Generalized Practices (CLAUDE.md §15)
+- Separate commit from push; never bypass pre-commit hooks (`--no-verify`).
+- Feature flags default off; no user-visible stubs; smoke-test real paths before shipping; version bumps only when authorized.
+- Package releases: semver + migration notes + deprecation window; inspect the artifact before publish; publish via CI.
+- Isolate test data via env var; promote dev→prod, watch logs, keep a rollback path.
+
+### Release Readiness & Branch Hygiene (RELEASE.md, CLAUDE.md §18)
+- A release is a gated event: Definition of Done green (CI, CVEs, secrets, CHANGELOG, version, docs, smoke test, rollback) before cutting.
+- Every branch is merged or deleted — no third state; delete-on-merge; PRs open >14 days are merged or closed.
+- Dependabot: group + cap + auto-merge passing patch/minor; hand-review majors only.
+
+### CI/CD Cost Tiering (IAC.md §7)
+- Cheap validation (lint/test/audit) on every PR; native Windows/macOS + multi-arch binary builds on **release tags only** (never per-PR/Dependabot); heavy matrix/e2e on demand or nightly.
+
+### Work Management: CelesteOps (CLAUDE.md §17)
+- When `mcp__celeste-ops__*` tools are present, use CelesteOps as the system of record for specs, implementation plans, and documentation/research reviews — link, don't duplicate. Falls back to in-repo markdown when absent.
+
+### Companion Docs
+- `IAC.md` — CI/CD + Infrastructure-as-Code playbook.
+- `SECURITY.md` — vulnerability disclosure + security engineering practices.
+- `RELEASE.md` — release readiness (Definition of Done) + branch/PR hygiene.
+- `docs/research.md` — research references (e.g. LLM-as-judge).
+
+---
+
+**Last Updated:** 2026-07-01 (aligned with `CLAUDE.md` v2.2 — companion docs IAC/SECURITY/RELEASE)
 **Maintained By:** whykusanagi team

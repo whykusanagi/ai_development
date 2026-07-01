@@ -8,7 +8,7 @@
   <img src="https://s3.whykusanagi.xyz/optimized_assets/cute_headshot_transparent_ghub.png" alt="Enterprise AI guardrails template" width="400" />
 </p>
 
-> ⚖️ **Compliance:** This README follows the guardrails codified in [`CLAUDE.md`](CLAUDE.md) and [`.cursorrules`](.cursorrules). Update the trio together.
+> ⚖️ **Compliance:** This README follows the guardrails codified in [`CLAUDE.md`](CLAUDE.md) and [`.cursorrules`](.cursorrules), with detailed policy in the companion docs [`IAC.md`](IAC.md), [`SECURITY.md`](SECURITY.md), and [`RELEASE.md`](RELEASE.md). Update them together.
 
 ## Bootstrap the Guardrails Template
 
@@ -32,8 +32,13 @@
 ## Template Components
 
 ### Core Agreements
-- `CLAUDE.md` – Human-readable working agreement covering persona usage, branching, secrets, MCP workflow.
+- `CLAUDE.md` – Human-readable working agreement covering persona usage, branching, secrets, coding standards, releases, and MCP workflow.
 - `.cursorrules` – Cursor-formatted equivalent auto-loaded for agents; keep it in sync with `CLAUDE.md`.
+
+### Policy Companion Docs
+- `IAC.md` – CI/CD pipeline structure, caching/matrix, release automation, containers, deploy targets, and CI/CD cost tiering.
+- `SECURITY.md` – Fill-in vulnerability-disclosure policy plus CI-enforced security practices (secret scanning, dependabot, CVE gates, incident runbook).
+- `RELEASE.md` – Release readiness (Definition of Done), the automated release flow, and branch/PR hygiene to stop dependabot/dead-branch sprawl.
 
 ### Bootstrap & Tooling
 - `bootstrap.py` – Generates directories, configs, Dockerfiles, pre-commit hooks, and `.secrets.baseline`.
@@ -49,6 +54,7 @@
 - `docs/architecture.md`, `docs/testing.md`, `docs/environment.md` – Mermaid-ready diagrams, manual test flows, and env-var registry.
 - `docs/decisions/ADR-template.md` – Lightweight ADR form for approvals.
 - `docs/storage.md` – Centralized S3/R2 procedures.
+- `docs/research.md` – Research references (e.g. LLM-as-a-judge evaluation) feeding the testing/quality bar.
 
 ## Guardrail Themes at a Glance
 
@@ -59,6 +65,9 @@
 | **.gitignore & Secrets Hygiene** | Block junk files and leaks. | Enforce the provided `.gitignore`, store secrets in `.secrets/` or env vars, document usage in `docs/environment.md`. |
 | **Docker, Storage, Structure** | Guarantee consistent runtime + organization. | Declare canonical Dockerfile, log deviations, centralize S3 procedures, keep folders tidy. |
 | **Testing & Quality Bar** | Supply audit-ready evidence. | Define success criteria, capture manual/browser steps, reuse shared utilities, keep lint clean. |
+| **Coding Standards** | Keep code consistent and reviewable. | Required per-language casing/formatters; `snake_case` on every wire boundary; never re-style mid-feature; review subagent code early for wrong code paths. |
+| **Release & Branch Hygiene** | Ship deliberately; stop PR/branch sprawl. | Definition of Done before release; every branch merged or deleted; group + auto-merge dependabot; see `RELEASE.md`. |
+| **CI/CD Cost Tiering** | Don't burn CI minutes on every PR. | Cheap validation per PR; native Windows/macOS + binary builds on release tags only; see `IAC.md` §7. |
 | **Safety & Autonomy** | Curb runaway refactors or infra surprises. | Socialize multi-file plans, pause for schema/migration work, avoid mass deletions without approval. |
 | **Final Checklist** | Prevent last-mile regressions. | Before merge: branch check, `.gitignore` sweep, Docker notes, test evidence, S3 adherence, persona compliance. |
 | **Celeste Persona** | Maintain knowledge continuity for CelesteAI integrations. | Talk via “memories/notes”, stay page-aware, never mention RAG/OpenSearch internals. |

@@ -741,7 +741,7 @@ curl -s -o /dev/null -w "Size: %{size_download} bytes, Status: %{http_code}\n" \
 
 ---
 
-**Last Updated:** 2025-12-06
-**Version:** 2.1 (Added GitHub Media Guidelines)
-**Replaces:** Version 2.0 (Comprehensive Standards)
+**Last Updated:** 2026-07-01
+**Version:** 2.2 (Added §15 Generalized Practices, §16 Coding Standards, §17 CelesteOps, §18 Release/Branch Hygiene; companion docs IAC.md/SECURITY.md/RELEASE.md; §13/§14 rewritten as directives/reference)
+**Replaces:** Version 2.1 (GitHub Media Guidelines)
 **Maintained By:** whykusanagi team

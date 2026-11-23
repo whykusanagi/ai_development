@@ -214,7 +214,13 @@ When in doubt: **favor clarity, rollback safety, and minimal blast radius.**
    - Avoid:
      - Running huge, unfocused test matrices without clear purpose.
 
-3. **If test criteria are unclear**
+3. **Turn the task into a verifiable goal before coding**
+   - "Fix the bug" → write/run a check that reproduces it, then make it pass. "Refactor X" → checks pass before and after.
+   - For multi-step work, state a brief plan where each step names its check:
+     `1. <step> → verify: <command or observable result>`
+   - Strong criteria let you loop until done without asking; "make it work" doesn't.
+
+4. **If test criteria are unclear**
    - Before running a ton of tests and wasting time:
      - Ask the user for clarification on success criteria.
    - Document any assumptions you make.
@@ -472,7 +478,7 @@ These are project-agnostic rules distilled from working agreements across many r
 
 ### 15.1. Commit & Hook Discipline
 - **Separate commit from push.** Do not chain `git commit && git push` in a single command. Pushing is outward-facing and harder to reverse — it deserves its own decision after the commit is reviewed.
-- **Never bypass pre-commit hooks** (`--no-verify`, skipping CI checks locally). If a hook fails — lint, type-check, unused-export, formatting — fix the cause, even if it predates your change. A green hook is the contract; silencing it ships the defect.
+- **Never bypass pre-commit hooks** (`--no-verify`, skipping CI checks locally). If a hook fails — lint, type-check, unused-export, formatting — fix the cause. A green hook is the contract; silencing it ships the defect. If the failure **predates your change**, fix it in a **separate commit made before yours** (e.g. `chore: fix pre-existing <check> failure`) and call it out in your summary — don't fold it into the feature diff (§16.3).
 
 ### 15.2. Shipping User-Facing Features
 - **Smoke-test real paths before shipping.** Exercise the actual code path with real inputs end-to-end. Passing unit tests are not a substitute — mocks hide integration failures.
@@ -520,6 +526,19 @@ Each language has ONE required convention set. These are non-negotiable, enforce
 - Review specifically for: convention violations (naming/style drift), and **wrong code paths** — calls into the wrong module, invented APIs, wrong import paths, functions that don't match the real signatures in the repo.
 - **Why this is early, not late:** a subagent that guesses a code path builds a feature on a foundation that doesn't exist. If that isn't caught immediately, later work compounds on the broken path and the whole feature ends up wrong and expensive to unwind. Catch the drift while it's one file, not ten.
 - Practical gate: after a subagent returns code, diff it against the surrounding code and verify every external reference (import, function, field) actually resolves in the repo before continuing.
+- Review for **scope drift** too (§16.3): revert hunks of a subagent diff that the task didn't need, or re-dispatch with a narrower instruction.
+
+### 16.3. Surgical Changes (Scope Discipline)
+**Touch only what the task needs. Clean up only your own mess.** §16.1 stops style drift; this stops scope drift.
+
+- **The test: every changed line traces directly to the request.** If you can't say which part of the request a hunk serves, revert the hunk.
+- Don't "improve" adjacent code, comments, typos, or formatting you happened to read. Don't refactor what isn't broken.
+- Pre-existing problems you notice (dead code, unused imports, bugs, lint debt): **mention them in your summary — don't fix them.** The user decides whether they become separate work.
+- Orphans **your** change created: **delete them in the same change** — this is required, not optional cleanup, and §11's caution about deletions does not apply to it. Example: you replace the only call to `_helper()` with a built-in → `_helper` now has no callers → delete it. Check with a grep before deleting.
+- Pre-existing dead code (unused before your edit): leave it and mention it.
+- Tests or checks you write to verify the task (§8.3) are in scope.
+- The exception is §15.1: a pre-existing failure that blocks a required hook gets fixed, in its own commit.
+- Branching (§2) still applies to every change. Other repo chores (gitignore entries, docs, CHANGELOG) are in scope only when the task is a feature or release, or the user asks for them. A small fix doesn't trigger them.
 
 ---
 
@@ -741,7 +760,7 @@ curl -s -o /dev/null -w "Size: %{size_download} bytes, Status: %{http_code}\n" \
 
 ---
 
-**Last Updated:** 2026-07-01
-**Version:** 2.2 (Added §15 Generalized Practices, §16 Coding Standards, §17 CelesteOps, §18 Release/Branch Hygiene; companion docs IAC.md/SECURITY.md/RELEASE.md; §13/§14 rewritten as directives/reference)
-**Replaces:** Version 2.1 (GitHub Media Guidelines)
+**Last Updated:** 2026-11-22
+**Version:** 2.3 (Added §16.3 Surgical Changes, §8.3 verifiable goals; §15.1 pre-existing hook failures get their own commit; §16.2 scope-drift review)
+**Replaces:** Version 2.2 (§15–18 Generalized Practices, Coding Standards, CelesteOps, Release/Branch Hygiene)
 **Maintained By:** whykusanagi team

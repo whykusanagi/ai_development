@@ -398,10 +398,12 @@ Quick reference. The authoritative detail lives in `CLAUDE.md` and the companion
 - Required per-language conventions: **Go** `mixedCaps`/`PascalCase` (never snake_case; gofmt) · **Python** `snake_case`/`PascalCase`/`UPPER_SNAKE` (ruff/black, 4-space) · **JS/TS** `camelCase`/`PascalCase`/`UPPER_SNAKE` (prettier+eslint, 2-space; TS types `PascalCase`, no `I` prefix) · **CSS** `kebab-case` + `--kebab-case` (stylelint).
 - Data/wire boundary (JSON keys, API fields, tool params, DB columns) is always `snake_case`, every language.
 - Never change a project's established conventions mid-feature; run the formatter, don't hand-style.
-- Review subagent-written code immediately for style drift **and wrong code paths** (invented APIs, wrong imports/signatures) before building on top.
+- Review subagent-written code immediately for style drift, **wrong code paths** (invented APIs, wrong imports/signatures), and **scope drift** before building on top.
+- **Surgical changes (§16.3):** every changed line traces to the request. Don't touch adjacent code, comments, typos or formatting; mention pre-existing issues instead of fixing them. Delete orphans *your* change created (e.g. a helper whose only call you replaced); leave pre-existing dead code. Gitignore/docs/CHANGELOG chores only for features/releases or when asked; branching still applies.
+- Turn tasks into verifiable goals before coding (§8.3): plan steps as `step → verify: check`.
 
 ### Generalized Practices (CLAUDE.md §15)
-- Separate commit from push; never bypass pre-commit hooks (`--no-verify`).
+- Separate commit from push; never bypass pre-commit hooks (`--no-verify`). Pre-existing hook failures get fixed in their own commit before yours.
 - Feature flags default off; no user-visible stubs; smoke-test real paths before shipping; version bumps only when authorized.
 - Package releases: semver + migration notes + deprecation window; inspect the artifact before publish; publish via CI.
 - Isolate test data via env var; promote dev→prod, watch logs, keep a rollback path.
@@ -425,5 +427,5 @@ Quick reference. The authoritative detail lives in `CLAUDE.md` and the companion
 
 ---
 
-**Last Updated:** 2026-07-01 (aligned with `CLAUDE.md` v2.2 — companion docs IAC/SECURITY/RELEASE)
+**Last Updated:** 2026-11-22 (aligned with `CLAUDE.md` v2.3 — surgical changes)
 **Maintained By:** whykusanagi team
